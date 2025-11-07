@@ -17,6 +17,13 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd dom xml
 
+# Install Xdebug
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
+
+# Copy Xdebug configuration
+COPY xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
 # Get Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -27,7 +34,7 @@ WORKDIR /var/www
 COPY . .
 
 # Install dependencies - this will fail loudly if there's an issue
-RUN composer install --no-interaction --optimize-autoloader --no-scripts || exit 1
+RUN if [ ! -d 'vendor' ]; then composer install --no-interaction --optimize-autoloader --no-scripts || exit 1; fi
 
 # Run any post-install scripts
 RUN composer run-script post-autoload-dump --no-interaction || true
