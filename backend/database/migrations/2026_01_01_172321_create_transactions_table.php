@@ -22,6 +22,7 @@ return new class extends Migration
             $table->timestampsTz();
 
             $table->foreign('user_id')->references('id')->on('users');
+            $table->index(['user_id', 'transaction_date']);
         });
     }
 
