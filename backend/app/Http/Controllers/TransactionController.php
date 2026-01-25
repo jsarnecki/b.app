@@ -24,7 +24,6 @@ class TransactionController extends Controller
         return [];
     }
 
-
     /**
      *
      */
@@ -39,7 +38,6 @@ class TransactionController extends Controller
             'description' => $data['description'],
             'transaction_date' => $data['transaction_date'],
         ]);
-
         return ['id' => $transaction->id];
     }
 
