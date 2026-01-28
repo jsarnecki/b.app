@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TransactionController extends Controller
@@ -10,9 +12,10 @@ class TransactionController extends Controller
     /**
      *
      */
-    public function index(): array
+    public function index(Request $request): JsonResponse
     {
-        return [];
+        $transactions = User::findOrFail($request->all()['id'])->transactions;
+        return response()->json($transactions);
     }
 
 

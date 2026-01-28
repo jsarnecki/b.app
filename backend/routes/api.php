@@ -16,4 +16,4 @@ Route::get('/test', function () {
 });
 
 Route::post('/create_transaction', [TransactionController::class, 'store']);
-
+Route::get('/get_transactions', [TransactionController::class, 'index']);
