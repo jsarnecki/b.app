@@ -1,12 +1,31 @@
-import { View } from "react-native"
+import { ScrollView, StyleSheet } from 'react-native';
+import { Appbar, Surface } from 'react-native-paper';
+import TransactionForm from '../components/TransactionForm';
 
-const HomeScreen = () => {
-
+export default function HomeScreen() {
   return (
-    <View>
+    <>
+      <Appbar.Header>
+        <Appbar.Content title="b.app" />
+      </Appbar.Header>
 
-    </View>
-  )
+      <ScrollView style={styles.container}>
+        <Surface style={styles.surface} elevation={1}>
+          <TransactionForm />
+        </Surface>
+      </ScrollView>
+    </>
+  );
 }
 
-export default HomeScreen;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  surface: {
+    margin: 16,
+    padding: 16,
+    borderRadius: 8,
+  },
+});
