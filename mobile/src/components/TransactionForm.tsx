@@ -12,8 +12,10 @@ const TransactionForm: React.FC = () => {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
+    setLoading(true);
     Keyboard.dismiss();
 
     try {
@@ -57,6 +59,8 @@ const TransactionForm: React.FC = () => {
     } catch (error) {
       console.error('Caught error:' + error);
     }
+
+    setLoading(false);
   };
 
   return (
@@ -88,6 +92,7 @@ const TransactionForm: React.FC = () => {
         mode="contained"
         onPress={handleSubmit}
         style={styles.button}
+        loading={loading}
       >
         Add Transaction
       </Button>
