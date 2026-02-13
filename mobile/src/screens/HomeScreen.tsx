@@ -9,7 +9,7 @@ export default function HomeScreen() {
         <Appbar.Content title="b.app" />
       </Appbar.Header>
 
-      <ScrollView style={styles.container}>
+      <ScrollView keyboardShouldPersistTaps="handled" style={styles.container}>
         <Surface style={styles.surface} elevation={1}>
           <TransactionForm />
         </Surface>
