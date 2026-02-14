@@ -6,7 +6,11 @@ import Constants from 'expo-constants';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl;
 
-const TransactionForm: React.FC = () => {
+interface TransactionFormProps {
+  fetchTransactions: () => void;
+}
+
+const TransactionForm = ({ fetchTransactions }: TransactionFormProps) => {
   const [type, setType] = useState('expense');
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
@@ -52,6 +56,7 @@ const TransactionForm: React.FC = () => {
         setCategory('');
         setAmount('');
         setDescription('');
+        fetchTransactions();
 
       } else {
         console.error('Response not ok.');
