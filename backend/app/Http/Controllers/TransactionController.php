@@ -32,7 +32,16 @@ class TransactionController extends Controller
      */
     public function store(Request $request): array
     {
-        $data = $request->all();
+        /* $data = $request->all(); */
+        $data = $request->validate([
+            'user_id' => 'required|integer', // eventually handle this by tying to auth user instead of as a param
+            'type' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
+            'amount'  => 'required|decimal:2',
+            'description'  => 'nullable|string',
+            'transaction_date'  => 'required|date', // eventually add specific format [Rule::date()->format(ideal timestamp)]
+        ]);
+
         $transaction = Transaction::create([
             'user_id' => $data['user_id'],
             'type' => $data['type'],
@@ -41,6 +50,7 @@ class TransactionController extends Controller
             'description' => $data['description'],
             'transaction_date' => $data['transaction_date'],
         ]);
+
         return ['id' => $transaction->id];
     }
 
