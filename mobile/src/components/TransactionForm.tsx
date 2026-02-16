@@ -8,9 +8,11 @@ const API_URL = Constants.expoConfig?.extra?.apiUrl;
 
 interface TransactionFormProps {
   fetchTransactions: () => void;
+  onSuccess: (message: string) => void;
+  onError: (message: string) => void;
 }
 
-const TransactionForm = ({ fetchTransactions }: TransactionFormProps) => {
+const TransactionForm = ({ fetchTransactions, onError, onSuccess }: TransactionFormProps) => {
   const [type, setType] = useState('expense');
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
@@ -18,7 +20,27 @@ const TransactionForm = ({ fetchTransactions }: TransactionFormProps) => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
 
+  const validateForm = () => {
+    if (!category.trim()) {
+      onError('Category is required');
+      console.log('cat fail');
+      return false;
+    }
+    if (!amount || parseFloat(amount) <= 0) {
+      // don't allow for negative amounts just yet.
+      console.log('amount fail');
+      onError('Amount must be greater than 0');
+      return false;
+    }
+    return true;
+  }
+
   const handleSubmit = async () => {
+
+    console.log('validating...');
+
+    if (!validateForm()) return;
+
     setLoading(true);
     Keyboard.dismiss();
 
@@ -30,14 +52,13 @@ const TransactionForm = ({ fetchTransactions }: TransactionFormProps) => {
         hour12: false
       }).format(new Date());
 
-      // needs validation
       const transaction = {
         user_id: 1, // Hardcode for now
-        type,
+        type, // default to expense
         category,
         amount: parseFloat(amount),
         description,
-        transaction_date: date,
+        transaction_date: date, // default to now, add timestamp picker later.
         justDate: currentDate
       };
 
@@ -45,24 +66,34 @@ const TransactionForm = ({ fetchTransactions }: TransactionFormProps) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify(transaction),
       });
 
-      console.log('Submitting:', transaction);
       const data = await response.json();
 
+      // make helper function for printing error objects.. or just watch logs?
+      console.log('response: ' + JSON.stringify(data, null, 2));
       if (response.ok) {
         setCategory('');
         setAmount('');
         setDescription('');
         fetchTransactions();
-
+        onSuccess('Transaction saved');
       } else {
-        console.error('Response not ok.');
+        // Handle validation errors
+        let error = data.message || 'Failed to save transaction';
+        if (data.errors) {
+          // Get first error message from the errors object
+          // error = Object.values(data.errors)[0][0];
+          error = Object.values(data.errors).flat().join(', ');
+        }
+        onError(error);
       }
     } catch (error) {
-      console.error('Caught error:' + error);
+      // Network errors, JSON parse errors, etc.
+      onError('Network error. Please try again.');
     }
 
     setLoading(false);
