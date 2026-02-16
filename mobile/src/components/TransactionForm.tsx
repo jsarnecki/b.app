@@ -17,7 +17,7 @@ const TransactionForm = ({ fetchTransactions, onError, onSuccess }: TransactionF
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  // const [date, setDate] = useState(new Date()); // State for eventual datepicker
   const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
@@ -42,21 +42,13 @@ const TransactionForm = ({ fetchTransactions, onError, onSuccess }: TransactionF
     Keyboard.dismiss();
 
     try {
-
-      const currentDate = new Intl.DateTimeFormat('en', {
-        dateStyle: 'short',
-        timeStyle: 'short',
-        hour12: false
-      }).format(new Date());
-
       const transaction = {
         user_id: 1, // Hardcode for now
         type, // default to expense
         category,
         amount: parseFloat(amount),
         description,
-        transaction_date: date, // default to now, add timestamp picker later.
-        justDate: currentDate
+        transaction_date: new Date(), // default to now, add timestamp picker later.
       };
 
       const response = await fetch(`${API_URL}/create_transaction`, {
