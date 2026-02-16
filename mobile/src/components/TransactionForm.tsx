@@ -22,13 +22,13 @@ const TransactionForm = ({ fetchTransactions, onError, onSuccess }: TransactionF
 
   const validateForm = () => {
     if (!category.trim()) {
+      Keyboard.dismiss();
       onError('Category is required');
-      console.log('cat fail');
       return false;
     }
     if (!amount || parseFloat(amount) <= 0) {
       // don't allow for negative amounts just yet.
-      console.log('amount fail');
+      Keyboard.dismiss();
       onError('Amount must be greater than 0');
       return false;
     }
@@ -36,9 +36,6 @@ const TransactionForm = ({ fetchTransactions, onError, onSuccess }: TransactionF
   }
 
   const handleSubmit = async () => {
-
-    console.log('validating...');
-
     if (!validateForm()) return;
 
     setLoading(true);
@@ -73,8 +70,8 @@ const TransactionForm = ({ fetchTransactions, onError, onSuccess }: TransactionF
 
       const data = await response.json();
 
-      // make helper function for printing error objects.. or just watch logs?
-      console.log('response: ' + JSON.stringify(data, null, 2));
+      // make helper function for printing error objects.. or just watch logs
+      // console.log('response: ' + JSON.stringify(data, null, 2));
       if (response.ok) {
         setCategory('');
         setAmount('');
@@ -85,8 +82,7 @@ const TransactionForm = ({ fetchTransactions, onError, onSuccess }: TransactionF
         // Handle validation errors
         let error = data.message || 'Failed to save transaction';
         if (data.errors) {
-          // Get first error message from the errors object
-          // error = Object.values(data.errors)[0][0];
+          // Chain all error messages together. 
           error = Object.values(data.errors).flat().join(', ');
         }
         onError(error);

@@ -13,19 +13,18 @@ use Illuminate\Validation\ValidationException;
 class TransactionController extends Controller
 {
     /**
-     *
+     * Get all Transactions for a User.
      */
     public function index(Request $request): JsonResponse
     {
-        // Handle auth verification.
+        // TODO: Handle auth verification.
         $user = User::findOrFail($request->all()['id']);
-        /* $transactions = $user->transactions; */
         return response()->json($user->transactions);
     }
 
 
     /**
-     *
+     * Show a Transaction for a User.
      */
     public function show(): array
     {
@@ -33,7 +32,7 @@ class TransactionController extends Controller
     }
 
     /**
-     *
+     * Create a new Transaction record.
      */
     public function store(Request $request): JsonResponse
     {
@@ -50,14 +49,13 @@ class TransactionController extends Controller
             $transaction = Transaction::create($data);
         } catch (Exception $error) {
             Log::error('Failed to create transaction: ' . $error->getMessage());
-            /* throw new Exception('Store error: ' . $error); */
             return response()->json(['error' => 'Failed to save transaction'], 500);
         }
         return response()->json(['id' => $transaction->id]);
     }
 
     /**
-     *
+     * Update a Transaction record.
      */
     public function update(): array
     {
@@ -65,7 +63,7 @@ class TransactionController extends Controller
     }
 
     /**
-     *
+     * Delete a Transaction record.
      */
     public function destroy(): array
     {

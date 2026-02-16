@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet } from 'react-native';
-import { Appbar, Snackbar, Surface } from 'react-native-paper';
+import { Appbar, Portal, Snackbar, Surface } from 'react-native-paper';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import { useEffect, useState } from 'react';
@@ -61,17 +61,20 @@ export default function HomeScreen() {
           <TransactionList transactions={transactions} />
         </Surface>
       </ScrollView>
-      <Snackbar
-        visible={snackbarVisible}
-        onDismiss={() => setSnackbarVisible(false)}
-        duration={3000}
-        action={{
-          label: 'Dismiss',
-          onPress: () => setSnackbarVisible(false),
-        }}
-      >
-        {snackbarMessage}
-      </Snackbar>
+      <Portal>
+        <Snackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          duration={3000}
+          action={{
+            label: 'Dismiss',
+            onPress: () => setSnackbarVisible(false),
+          }}
+        // wrapperStyle={{ top: 0, bottom: 'auto' }}
+        >
+          {snackbarMessage}
+        </Snackbar>
+      </Portal>
     </>
   );
 }
