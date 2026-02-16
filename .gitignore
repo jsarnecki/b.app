@@ -40,3 +40,7 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
+
+# Custom
+_ide_helper*
+.phpstorm.meta.php

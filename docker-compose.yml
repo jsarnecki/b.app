@@ -42,6 +42,20 @@ services:
       sh -c "if [ ! -d 'vendor' ]; then composer install --no-interaction --optimize-autoloader; fi &&
              php artisan serve --host=0.0.0.0 --port=8000"
 
+  # Adminer db viewer
+  adminer:
+    image: adminer
+    container_name: budget_adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - budget_network
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+
 networks:
   budget_network:
     driver: bridge
