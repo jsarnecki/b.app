@@ -1,22 +1,18 @@
 import { ScrollView, StyleSheet } from 'react-native';
-import { Appbar, Portal, Snackbar, Surface } from 'react-native-paper';
+import { Appbar, Surface } from 'react-native-paper';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import { useEffect, useState } from 'react';
 import Constants from 'expo-constants';
+import { useSnackbar } from '../providers/SnackbarProvider';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl;
 
 export default function HomeScreen() {
   const [transactions, setTransactions] = useState([]);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
 
-  const showMessage = (message: string) => {
-    setSnackbarVisible(true);
-    setSnackbarMessage(message);
-  }
+  const { showSnackbar } = useSnackbar();
 
   const fetchTransactions = async () => {
     setLoading(true);
@@ -35,7 +31,7 @@ export default function HomeScreen() {
         console.error('Something happened fetching transactions');
       }
     } catch (error) {
-      showMessage(`Error fetching transactions: ${error}`)
+      showSnackbar(`Error fetching transactions: ${error}`)
     }
     setLoading(false);
   };
@@ -54,27 +50,13 @@ export default function HomeScreen() {
         <Surface style={styles.surface} elevation={1}>
           <TransactionForm
             fetchTransactions={fetchTransactions}
-            onSuccess={showMessage}
-            onError={showMessage}
+            onSuccess={showSnackbar}
+            onError={showSnackbar}
           />
 
           <TransactionList transactions={transactions} />
         </Surface>
       </ScrollView>
-      <Portal>
-        <Snackbar
-          visible={snackbarVisible}
-          onDismiss={() => setSnackbarVisible(false)}
-          duration={3000}
-          action={{
-            label: 'Dismiss',
-            onPress: () => setSnackbarVisible(false),
-          }}
-        // wrapperStyle={{ top: 0, bottom: 'auto' }}
-        >
-          {snackbarMessage}
-        </Snackbar>
-      </Portal>
     </>
   );
 }
