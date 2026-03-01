@@ -7,12 +7,12 @@ import Constants from 'expo-constants';
 const API_URL = Constants.expoConfig?.extra?.apiUrl;
 
 interface TransactionFormProps {
-  fetchTransactions: () => void;
+  // fetchTransactions: () => void;
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
 }
 
-const TransactionForm = ({ fetchTransactions, onError, onSuccess }: TransactionFormProps) => {
+const TransactionForm = ({ onError, onSuccess }: TransactionFormProps) => {
   const [type, setType] = useState('expense');
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
@@ -68,7 +68,7 @@ const TransactionForm = ({ fetchTransactions, onError, onSuccess }: TransactionF
         setCategory('');
         setAmount('');
         setDescription('');
-        fetchTransactions();
+        // fetchTransactions();
         onSuccess('Transaction saved');
       } else {
         // Handle validation errors
