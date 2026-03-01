@@ -1,5 +1,5 @@
-import { createContext, useContext, useState } from "react";
-import { Portal, Snackbar } from "react-native-paper";
+import { createContext, useContext, useState } from 'react';
+import { Portal, Snackbar } from 'react-native-paper';
 
 interface SnackbarContextType {
   showSnackbar: (message: string) => void;

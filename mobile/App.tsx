@@ -6,7 +6,7 @@ import SnackbarProvider from './src/providers/SnackbarProvider';
 export default function App() {
   return (
     <SafeAreaProvider>
-      <PaperProvider >
+      <PaperProvider>
         <SnackbarProvider>
           <AppNavigator />
         </SnackbarProvider>

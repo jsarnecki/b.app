@@ -64,7 +64,6 @@ const TransactionForm = () => {
         setCategory('');
         setAmount('');
         setDescription('');
-        // fetchTransactions();
         showSnackbar('Transaction saved');
       } else {
         // Handle validation errors

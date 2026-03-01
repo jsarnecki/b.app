@@ -1,9 +1,9 @@
-import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import HomeScreen from "../screens/HomeScreen";
-import TransactionListScreen from "../screens/TransactionListScreen";
-import SettingsScreen from "../screens/SettingsScreen";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import HomeScreen from '../screens/HomeScreen';
+import TransactionListScreen from '../screens/TransactionListScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
 
