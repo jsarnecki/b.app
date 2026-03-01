@@ -3,33 +3,29 @@ import { View, StyleSheet, Keyboard } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import MoneyInput from './MoneyInput';
 import Constants from 'expo-constants';
+import { useSnackbar } from '../providers/SnackbarProvider';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl;
 
-interface TransactionFormProps {
-  // fetchTransactions: () => void;
-  onSuccess: (message: string) => void;
-  onError: (message: string) => void;
-}
-
-const TransactionForm = ({ onError, onSuccess }: TransactionFormProps) => {
+const TransactionForm = () => {
   const [type, setType] = useState('expense');
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   // const [date, setDate] = useState(new Date()); // State for eventual datepicker
   const [loading, setLoading] = useState(false);
+  const { showSnackbar } = useSnackbar();
 
   const validateForm = () => {
     if (!category.trim()) {
       Keyboard.dismiss();
-      onError('Category is required');
+      showSnackbar('Category is required');
       return false;
     }
     if (!amount || parseFloat(amount) <= 0) {
       // don't allow for negative amounts just yet.
       Keyboard.dismiss();
-      onError('Amount must be greater than 0');
+      showSnackbar('Amount must be greater than 0');
       return false;
     }
     return true;
@@ -69,7 +65,7 @@ const TransactionForm = ({ onError, onSuccess }: TransactionFormProps) => {
         setAmount('');
         setDescription('');
         // fetchTransactions();
-        onSuccess('Transaction saved');
+        showSnackbar('Transaction saved');
       } else {
         // Handle validation errors
         let error = data.message || 'Failed to save transaction';
@@ -77,11 +73,11 @@ const TransactionForm = ({ onError, onSuccess }: TransactionFormProps) => {
           // Chain all error messages together. 
           error = Object.values(data.errors).flat().join(', ');
         }
-        onError(error);
+        showSnackbar(error);
       }
     } catch (error) {
       // Network errors, JSON parse errors, etc.
-      onError('Network error. Please try again.');
+      showSnackbar('Network error. Please try again.');
     }
 
     setLoading(false);
