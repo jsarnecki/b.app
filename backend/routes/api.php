@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\TransactionController;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,5 +17,6 @@ Route::get('/test', function () {
     ]);
 });
 
+Route::get('/me', fn() => User::find(1));
 Route::post('/create_transaction', [TransactionController::class, 'store']);
 Route::get('/get_transactions', [TransactionController::class, 'index']);
