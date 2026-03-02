@@ -4,10 +4,13 @@ import { TextInput, Button } from 'react-native-paper';
 import MoneyInput from './MoneyInput';
 import Constants from 'expo-constants';
 import { useSnackbar } from '../providers/SnackbarProvider';
+import { useUser } from '../providers/UserProvider';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl;
 
 const TransactionForm = () => {
+  const { user, isLoading: userLoading } = useUser();
+
   const [type, setType] = useState('expense');
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
@@ -39,7 +42,7 @@ const TransactionForm = () => {
 
     try {
       const transaction = {
-        user_id: 1, // Hardcode for now
+        user_id: user.id,
         type, // default to expense
         category,
         amount: parseFloat(amount),

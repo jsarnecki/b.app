@@ -5,10 +5,13 @@ import { useCallback, useState } from 'react';
 import Constants from 'expo-constants';
 import { useSnackbar } from '../providers/SnackbarProvider';
 import { useFocusEffect } from '@react-navigation/native';
+import { useUser } from '../providers/UserProvider';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl;
 
 export default function TransactionListScreen() {
+  const { user, isLoading: userLoading } = useUser();
+
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +22,7 @@ export default function TransactionListScreen() {
       const fetchTransactions = async () => {
         setLoading(true);
         try {
-          const response = await fetch(`${API_URL}/get_transactions?id=1`, {
+          const response = await fetch(`${API_URL}/get_transactions?id=${user.id}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
