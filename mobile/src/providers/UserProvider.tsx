@@ -56,11 +56,9 @@ export default function UserProvider({ children }: { children: React.ReactNode }
   }, []);
 
   return (
-    <Portal>
-      <UserContext.Provider value={{ user, isLoading }}>
-        {children}
-      </UserContext.Provider>
-    </Portal>
+    <UserContext.Provider value={{ user, isLoading }}>
+      {children}
+    </UserContext.Provider>
   )
 }
 
