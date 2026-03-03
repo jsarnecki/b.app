@@ -49,7 +49,7 @@ class TransactionController extends Controller
             $transaction = Transaction::create($data);
         } catch (Exception $error) {
             Log::error('Failed to create transaction: ' . $error->getMessage());
-            return response()->json(['error' => 'Failed to save transaction'], 500);
+            return response()->json(['message' => 'Failed to save transaction'], 500);
         }
         return response()->json(['id' => $transaction->id]);
     }
