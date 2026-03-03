@@ -14,7 +14,7 @@ const Tab = createBottomTabNavigator();
 export default function AppNavigator() {
   const { user, isLoading } = useUser();
 
-  if (isLoading) return <LoadingScreen />
+  if (isLoading) return <LoadingScreen />;
   if (!user) {
     // return <LoginNavigator/> // eventually
     console.error('No user found.');
@@ -23,7 +23,6 @@ export default function AppNavigator() {
   const renderOptions = (iconName: IconName) => ({
     tabBarIcon: () => <MaterialCommunityIcons name={iconName} color="black" size={21} />
   });
-  console.log('Your user has an ID of ' + user.id);
 
   return (
     <NavigationContainer>
