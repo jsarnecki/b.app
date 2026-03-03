@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Keyboard } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import MoneyInput from './MoneyInput';
-import Constants from 'expo-constants';
 import { useSnackbar } from '../providers/SnackbarProvider';
 import { useUser } from '../providers/UserProvider';
-
-const API_URL = Constants.expoConfig?.extra?.apiUrl;
+import { postJson } from '../api/api';
 
 const TransactionForm = () => {
   const { user, isLoading: userLoading } = useUser();
@@ -50,36 +48,16 @@ const TransactionForm = () => {
         transaction_date: new Date(), // default to now, add timestamp picker later.
       };
 
-      const response = await fetch(`${API_URL}/create_transaction`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(transaction),
-      });
-
-      const data = await response.json();
+      await postJson('create_transaction', transaction);
 
       // make helper function for printing error objects.. or just watch logs
       // console.log('response: ' + JSON.stringify(data, null, 2));
-      if (response.ok) {
-        setCategory('');
-        setAmount('');
-        setDescription('');
-        showSnackbar('Transaction saved');
-      } else {
-        // Handle validation errors
-        let error = data.message || 'Failed to save transaction';
-        if (data.errors) {
-          // Chain all error messages together. 
-          error = Object.values(data.errors).flat().join(', ');
-        }
-        showSnackbar(error);
-      }
+      setCategory('');
+      setAmount('');
+      setDescription('');
+      showSnackbar('Transaction saved');
     } catch (error) {
-      // Network errors, JSON parse errors, etc.
-      showSnackbar('Network error. Please try again.');
+      showSnackbar(error instanceof Error ? error.message : 'Network error, please try again.');
     }
 
     setLoading(false);
