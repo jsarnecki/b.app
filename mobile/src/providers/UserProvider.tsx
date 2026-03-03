@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { Portal, Snackbar } from 'react-native-paper';
 import { useSnackbar } from './SnackbarProvider';
+import { getJson } from '../api/api';
 
 interface User {
   id: number;
@@ -23,32 +23,19 @@ export default function UserProvider({ children }: { children: React.ReactNode }
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
 
-  // On mount, check for token
   useEffect(() => {
     const authenticateUser = async () => {
       try {
         const token: string | null = await AsyncStorage.getItem('auth_token');
         if (token) {
-          //Use existing token to fetch user data
-          const API_URL = 'placehold';
-          const response = await fetch(`${API_URL}/api/me`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            }
-          });
-          const data = await response.json();
-          if (response.ok) {
-            setUser(data);
-          } else {
-            console.error('Issue fetching user.');
-          }
+          const data = await getJson('api/me'); //Use existing token to fetch user data
+
+          setUser(data);
         } else {
           setUser(DEV_DEFAULT_USER);
         }
       } catch (error) {
-        showSnackbar('Error fetching user: ' + error);
+        showSnackbar(error instanceof Error ? error.message : 'Issue fetching user.');
       }
       setIsLoading(false);
     }
