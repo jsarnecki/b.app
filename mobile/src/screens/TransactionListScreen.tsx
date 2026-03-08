@@ -1,14 +1,15 @@
 import { ScrollView, StyleSheet } from 'react-native';
-import { Appbar, Surface } from 'react-native-paper';
+import { Surface } from 'react-native-paper';
 import TransactionList from '../components/TransactionList';
 import { useCallback, useState } from 'react';
-import Constants from 'expo-constants';
 import { useSnackbar } from '../providers/SnackbarProvider';
 import { useFocusEffect } from '@react-navigation/native';
-
-const API_URL = Constants.expoConfig?.extra?.apiUrl;
+import { useUser } from '../providers/UserProvider';
+import { getJson } from '../api/api';
 
 export default function TransactionListScreen() {
+  const { user } = useUser();
+
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -19,21 +20,11 @@ export default function TransactionListScreen() {
       const fetchTransactions = async () => {
         setLoading(true);
         try {
-          const response = await fetch(`${API_URL}/get_transactions?id=1`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
+          const data = await getJson(`get_transactions?id=${user.id}`);
 
-          const data = await response.json();
-          if (response.ok) {
-            setTransactions(data);
-          } else {
-            console.error('Something happened fetching transactions');
-          }
+          setTransactions(data);
         } catch (error) {
-          showSnackbar(`Error fetching transactions: ${error}`)
+          showSnackbar(error instanceof Error ? error.message : 'Network error, please try again.');
         }
         setLoading(false);
       }

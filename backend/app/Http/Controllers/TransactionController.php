@@ -7,6 +7,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -46,10 +47,13 @@ class TransactionController extends Controller
         ]);
 
         try {
+            DB::beginTransaction();
             $transaction = Transaction::create($data);
+            DB::commit();
         } catch (Exception $error) {
+            DB::rollBack();
             Log::error('Failed to create transaction: ' . $error->getMessage());
-            return response()->json(['error' => 'Failed to save transaction'], 500);
+            return response()->json(['message' => 'Failed to save transaction'], 500);
         }
         return response()->json(['id' => $transaction->id]);
     }
