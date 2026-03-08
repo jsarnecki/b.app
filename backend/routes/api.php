@@ -17,6 +17,6 @@ Route::get('/test', function () {
     ]);
 });
 
-Route::get('/me', fn() => User::find(1));
+Route::get('/me', fn() => User::findOrFail(1)); // Temp hard code
 Route::post('/create_transaction', [TransactionController::class, 'store']);
 Route::get('/get_transactions', [TransactionController::class, 'index']);

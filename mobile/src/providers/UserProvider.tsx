@@ -29,7 +29,6 @@ export default function UserProvider({ children }: { children: React.ReactNode }
         const token: string | null = await AsyncStorage.getItem('auth_token');
         if (token) {
           const data = await getJson('api/me'); //Use existing token to fetch user data
-
           setUser(data);
         } else {
           setUser(DEV_DEFAULT_USER);

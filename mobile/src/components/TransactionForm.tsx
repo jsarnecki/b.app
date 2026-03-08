@@ -50,8 +50,6 @@ const TransactionForm = () => {
 
       await postJson('create_transaction', transaction);
 
-      // make helper function for printing error objects.. or just watch logs
-      // console.log('response: ' + JSON.stringify(data, null, 2));
       setCategory('');
       setAmount('');
       setDescription('');
