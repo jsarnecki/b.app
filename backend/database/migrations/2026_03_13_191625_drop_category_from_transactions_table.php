@@ -9,17 +9,17 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::table('transactions', function (Blueprint $table) {
-            $table->dropColumn('category');
-        });
-    }
+public function up(): void
+{
+    Schema::table('transactions', function (Blueprint $table) {
+        $table->dropColumn('category');
+    });
+}
 
-    public function down(): void
-    {
-        Schema::table('transactions', function (Blueprint $table) {
-            $table->string('category')->nullable();
-        });
-    }
+public function down(): void
+{
+    Schema::table('transactions', function (Blueprint $table) {
+        $table->string('category')->nullable();
+    });
+}
 };
