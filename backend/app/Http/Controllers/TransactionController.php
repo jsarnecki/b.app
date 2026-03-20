@@ -19,7 +19,8 @@ class TransactionController extends Controller
     public function index(Request $request): JsonResponse
     {
         // TODO: Handle auth verification.
-        $user = User::findOrFail($request->all()['id']);
+        $user = User::findOrFail($request->all()['id']); // Temp explicit argument until auth
+        // Transaction resource that pulls the category data from the category_id
         return response()->json($user->transactions);
     }
 
@@ -40,7 +41,7 @@ class TransactionController extends Controller
         $data = $request->validate([
             'user_id' => 'required|integer', // eventually handle this by tying to auth user instead of as a param
             'type' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
+            'category_id' => 'required|integer', // I think the F/E will have the ID
             'amount' => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'transaction_date' => 'required|date', // eventually add specific format [Rule::date()->format(ideal timestamp)]
