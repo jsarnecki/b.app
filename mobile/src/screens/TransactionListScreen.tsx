@@ -20,7 +20,7 @@ export default function TransactionListScreen() {
       const fetchTransactions = async () => {
         setLoading(true);
         try {
-          const data = await getJson(`get_transactions?id=${user.id}`);
+          const data = await getJson(`transactions?id=${user.id}`);
 
           setTransactions(data);
         } catch (error) {

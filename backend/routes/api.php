@@ -19,9 +19,6 @@ Route::get('/test', function () {
 });
 
 Route::get('/me', fn() => User::findOrFail(1)); // Temp hard code
-Route::post('/create_transaction', [TransactionController::class, 'store']);
-Route::get('/get_transactions', [TransactionController::class, 'index']);
 
-Route::get('/categories', [CategoryController::class, 'index']);
-Route::post('/categories', [CategoryController::class, 'store']);
-Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+Route::apiResource('/transactions', TransactionController::class);
+Route::apiResource('/categories', CategoryController::class);

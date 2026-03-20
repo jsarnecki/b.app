@@ -48,7 +48,7 @@ const TransactionForm = () => {
         transaction_date: new Date(), // default to now, add timestamp picker later.
       };
 
-      await postJson('create_transaction', transaction);
+      await postJson('transactions', transaction);
 
       setCategory('');
       setAmount('');
