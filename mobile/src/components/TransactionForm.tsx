@@ -6,11 +6,19 @@ import { useSnackbar } from '../providers/SnackbarProvider';
 import { useUser } from '../providers/UserProvider';
 import { postJson } from '../api/api';
 
+// let's think about creating types directory.
+interface Category {
+  id: number;
+  name: string;
+  user_id: number;
+  // timestamps
+}
+
 const TransactionForm = () => {
   const { user, isLoading: userLoading } = useUser();
 
   const [type, setType] = useState('expense');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState<Category | null>(null);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   // const [date, setDate] = useState(new Date()); // State for eventual datepicker
@@ -18,7 +26,7 @@ const TransactionForm = () => {
   const { showSnackbar } = useSnackbar();
 
   const validateForm = () => {
-    if (!category.trim()) {
+    if (!category) {
       Keyboard.dismiss();
       showSnackbar('Category is required');
       return false;
@@ -42,7 +50,7 @@ const TransactionForm = () => {
       const transaction = {
         user_id: user.id,
         type, // default to expense
-        category,
+        category_id: category.id,
         amount: parseFloat(amount),
         description,
         transaction_date: new Date(), // default to now, add timestamp picker later.
@@ -50,7 +58,7 @@ const TransactionForm = () => {
 
       await postJson('transactions', transaction);
 
-      setCategory('');
+      setCategory(null);
       setAmount('');
       setDescription('');
       showSnackbar('Transaction saved');
@@ -60,16 +68,16 @@ const TransactionForm = () => {
 
     setLoading(false);
   };
+  // <TextInput
+  // label="Category"
+  // value={category}
+  // onChangeText={setCategory}
+  // mode="outlined"
+  // style={styles.input}
+  // />
 
   return (
     <View style={styles.form}>
-      <TextInput
-        label="Category"
-        value={category}
-        onChangeText={setCategory}
-        mode="outlined"
-        style={styles.input}
-      />
 
       <MoneyInput
         value={amount}
