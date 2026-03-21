@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Keyboard } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
+import { Dropdown } from 'react-native-element-dropdown';
+import { TextInput, Button, Menu } from 'react-native-paper';
 import MoneyInput from './MoneyInput';
 import { useSnackbar } from '../providers/SnackbarProvider';
 import { useUser } from '../providers/UserProvider';
-import { postJson } from '../api/api';
+import { getJson, postJson } from '../api/api';
 
 // let's think about creating types directory.
 interface Category {
@@ -16,14 +17,31 @@ interface Category {
 
 const TransactionForm = () => {
   const { user, isLoading: userLoading } = useUser();
+  const { showSnackbar } = useSnackbar();
 
+  // const [date, setDate] = useState(new Date()); // State for eventual datepicker
   const [type, setType] = useState('expense');
   const [category, setCategory] = useState<Category | null>(null);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
-  // const [date, setDate] = useState(new Date()); // State for eventual datepicker
   const [loading, setLoading] = useState(false);
-  const { showSnackbar } = useSnackbar();
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const getCategories = async () => {
+    setLoading(true);
+    try {
+      const data = await getJson('categories');
+      setCategories(data);
+    } catch {
+      showSnackbar('Issue fetching categories for menu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getCategories();
+  }, []);
 
   const validateForm = () => {
     if (!category) {
@@ -38,7 +56,7 @@ const TransactionForm = () => {
       return false;
     }
     return true;
-  }
+  };
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
@@ -68,22 +86,28 @@ const TransactionForm = () => {
 
     setLoading(false);
   };
-  // <TextInput
-  // label="Category"
-  // value={category}
-  // onChangeText={setCategory}
-  // mode="outlined"
-  // style={styles.input}
-  // />
 
   return (
     <View style={styles.form}>
-
+      <Dropdown
+        mode="modal"
+        data={categories.map((c) => ({ label: c.name, value: c.id }))}
+        labelField="label"
+        valueField="value"
+        placeholder="Category"
+        value={category?.id ?? null}
+        onChange={(item) => {
+          const found = categories.find((c) => c.id === item.value) ?? null;
+          setCategory(found);
+        }}
+        style={styles.dropdown}
+        placeholderStyle={styles.dropdownPlaceholder}
+        selectedTextStyle={styles.dropdownSelectedText}
+      />
       <MoneyInput
         value={amount}
         onChangeAmount={setAmount}
       />
-
       <TextInput
         label="Description"
         value={description}
@@ -93,7 +117,6 @@ const TransactionForm = () => {
         numberOfLines={3}
         style={styles.input}
       />
-
       <Button
         mode="contained"
         onPress={handleSubmit}
@@ -115,6 +138,19 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 8,
+  },
+  dropdown: {
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 12,
+  },
+  dropdownPlaceholder: {
+    color: 'gray',
+  },
+  dropdownSelectedText: {
+    fontSize: 16,
   },
 });
 
