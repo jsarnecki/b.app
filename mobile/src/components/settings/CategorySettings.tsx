@@ -1,24 +1,32 @@
-import React, { useState, useCallback } from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
-import { Text, Button, Surface, IconButton, TextInput, ActivityIndicator } from 'react-native-paper';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  Text,
+  Surface,
+  IconButton,
+  Checkbox,
+  Modal,
+  Portal,
+  TextInput,
+  Button,
+  ActivityIndicator,
+} from 'react-native-paper';
 import { useSnackbar } from '../../providers/SnackbarProvider';
 import { deleteJson, getJson, postJson } from '../../api/api';
 
-interface Category {
+type Category = {
   id: number;
   name: string;
-}
+};
 
-interface Props {
-  onFocus?: () => void;
-}
-
-export default function CategorySettings({ onFocus }: Props) {
+export default function CategorySettings() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [modalVisible, setModalVisible] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
-  const [showInput, setShowInput] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [deletingId, setDeletingId] = useState<number>(0);
+  const [deleting, setDeleting] = useState(false);
   const { showSnackbar } = useSnackbar();
 
   const fetchCategories = useCallback(async () => {
@@ -30,9 +38,40 @@ export default function CategorySettings({ onFocus }: Props) {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
+
+  const exitEditMode = () => {
+    setEditMode(false);
+    setSelectedIds(new Set());
+  };
+
+  const toggleSelected = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    setDeleting(true);
+    try {
+      await Promise.all([...selectedIds].map((id) => deleteJson(`categories/${id}`)));
+      await fetchCategories();
+      exitEditMode();
+      showSnackbar(
+        selectedIds.size === 1
+          ? 'Category deleted'
+          : `${selectedIds.size} categories deleted`
+      );
+    } catch {
+      showSnackbar('Failed to delete categories');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const handleAdd = async () => {
     const trimmed = newCategoryName.trim();
@@ -42,7 +81,7 @@ export default function CategorySettings({ onFocus }: Props) {
     try {
       await postJson('categories', { name: trimmed });
       setNewCategoryName('');
-      setShowInput(false);
+      setModalVisible(false);
       await fetchCategories();
       showSnackbar('Category added');
     } catch {
@@ -52,111 +91,189 @@ export default function CategorySettings({ onFocus }: Props) {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    setDeletingId(id);
-    try {
-      await deleteJson(`categories/${id}`)
-      await fetchCategories();
-      showSnackbar('Category deleted');
-    } catch {
-      showSnackbar('Failed to delete category');
-    } finally {
-      setDeletingId(0);
-    }
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <Text variant="titleSmall" style={styles.headerTitle}>
+        Categories
+      </Text>
+      <View style={styles.headerActions}>
+        {editMode ? (
+          <>
+            <IconButton
+              icon="plus"
+              size={20}
+              onPress={() => setModalVisible(true)}
+            />
+            {selectedIds.size > 0 && (
+              deleting ? (
+                <ActivityIndicator size={20} style={styles.deleteLoader} />
+              ) : (
+                <IconButton
+                  icon="delete-outline"
+                  size={20}
+                  onPress={handleBulkDelete}
+                />
+              )
+            )}
+            <IconButton
+              icon="close"
+              size={20}
+              onPress={exitEditMode}
+            />
+          </>
+        ) : (
+          <IconButton
+            icon="pencil-outline"
+            size={20}
+            onPress={() => setEditMode(true)}
+          />
+        )}
+      </View>
+    </View>
+  );
+
+  const renderItem = ({ item }: { item: Category }) => {
+    const isSelected = selectedIds.has(item.id);
+
+    return (
+      <TouchableOpacity
+        onPress={() => editMode && toggleSelected(item.id)}
+        activeOpacity={editMode ? 0.6 : 1}
+        style={styles.itemRow}
+      >
+        {editMode && (
+          <Checkbox
+            status={isSelected ? 'checked' : 'unchecked'}
+            onPress={() => toggleSelected(item.id)}
+          />
+        )}
+        <Text style={styles.itemName}>{item.name}</Text>
+      </TouchableOpacity>
+    );
   };
 
   return (
-    <View>
-      <View style={styles.header}>
-        <Text variant="titleMedium">Categories</Text>
-        <Button
-          mode="text"
-          icon="plus"
-          onPress={() => setShowInput((v) => !v)}
-        >
-          Add
-        </Button>
-      </View>
+    <>
+      <Surface style={styles.container} elevation={1}>
+        {renderHeader()}
+        <View style={styles.divider} />
+        <FlatList
+          data={categories}
+          keyExtractor={(item) => String(item.id)}
+          scrollEnabled={false}
+          renderItem={renderItem}
+          ListEmptyComponent={
+            <Text style={styles.empty}>No categories yet.</Text>
+          }
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+        />
+      </Surface>
 
-      {showInput && (
-        <View style={styles.inputRow}>
+      <Portal>
+        <Modal
+          visible={modalVisible}
+          onDismiss={() => {
+            setModalVisible(false);
+            setNewCategoryName('');
+          }}
+          contentContainerStyle={styles.modal}
+        >
+          <Text variant="titleMedium" style={styles.modalTitle}>
+            New Category
+          </Text>
           <TextInput
             mode="outlined"
             label="Category name"
             value={newCategoryName}
             onChangeText={setNewCategoryName}
-            style={styles.input}
             autoFocus
+            style={styles.modalInput}
           />
-          <Button
-            mode="contained"
-            onPress={handleAdd}
-            loading={adding}
-            disabled={adding || !newCategoryName.trim()}
-            style={styles.saveButton}
-          >
-            Save
-          </Button>
-        </View>
-      )}
-
-      <FlatList
-        data={categories}
-        keyExtractor={(item) => String(item.id)}
-        scrollEnabled={false}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => {
-          const isDeleting = deletingId === item.id;
-          return (
-            <Surface style={styles.card} elevation={1}>
-              <IconButton icon="drag" size={18} style={styles.dragHandle} />
-              <Text style={styles.categoryName}>{item.name}</Text>
-              {isDeleting ? (
-                <ActivityIndicator size={18} style={styles.deleteAction} />
-              ) : (
-                <IconButton
-                  icon="delete-outline"
-                  size={18}
-                  style={styles.deleteAction}
-                  onPress={() => handleDelete(item.id)}
-                />
-              )}
-            </Surface>
-          );
-        }}
-        ListEmptyComponent={
-          <Text style={styles.empty}>No categories yet.</Text>
-        }
-      />
-    </View>
+          <View style={styles.modalActions}>
+            <Button
+              onPress={() => {
+                setModalVisible(false);
+                setNewCategoryName('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              mode="contained"
+              onPress={handleAdd}
+              loading={adding}
+              disabled={adding || !newCategoryName.trim()}
+            >
+              Save
+            </Button>
+          </View>
+        </Modal>
+      </Portal>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
   header: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  input: { flex: 1 },
-  saveButton: { marginTop: 6 },
-  list: { gap: 8 },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 8,
+    paddingLeft: 16,
+    paddingRight: 4,
     paddingVertical: 4,
-    paddingHorizontal: 4,
   },
-  dragHandle: { opacity: 0.3 },
-  categoryName: { flex: 1 },
-  deleteAction: { margin: 0 },
-  empty: { textAlign: 'center', marginTop: 16, opacity: 0.5 },
+  headerTitle: {
+    fontWeight: '600',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  deleteLoader: {
+    marginHorizontal: 8,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+  },
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  itemName: {
+    flex: 1,
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    marginLeft: 16,
+  },
+  empty: {
+    textAlign: 'center',
+    padding: 24,
+    opacity: 0.5,
+  },
+  modal: {
+    margin: 24,
+    borderRadius: 12,
+    padding: 24,
+    backgroundColor: 'white',
+  },
+  modalTitle: {
+    marginBottom: 16,
+  },
+  modalInput: {
+    marginBottom: 16,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+  },
 });
