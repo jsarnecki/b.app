@@ -13,9 +13,9 @@ use Illuminate\Validation\ValidationException;
 
 class TransactionController extends Controller
 {
-
     // TODO: Handle auth verification.
-    public int $userID = 1;
+    protected int $userID = 1;
+
     /**
      * Get all Transactions for a User.
      */
