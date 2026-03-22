@@ -1,24 +1,48 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, StyleSheet, Keyboard } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 import { TextInput, Button } from 'react-native-paper';
 import MoneyInput from './MoneyInput';
 import { useSnackbar } from '../providers/SnackbarProvider';
-import { useUser } from '../providers/UserProvider';
-import { postJson } from '../api/api';
+import { getJson, postJson } from '../api/api';
+import { useFocusEffect } from '@react-navigation/native';
+
+// let's think about creating types directory.
+interface Category {
+  id: number;
+  name: string;
+  user_id: number;
+  // timestamps
+}
 
 const TransactionForm = () => {
-  const { user, isLoading: userLoading } = useUser();
-
-  const [type, setType] = useState('expense');
-  const [category, setCategory] = useState('');
-  const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
-  // const [date, setDate] = useState(new Date()); // State for eventual datepicker
-  const [loading, setLoading] = useState(false);
   const { showSnackbar } = useSnackbar();
 
+  // const [date, setDate] = useState(new Date()); // State for eventual datepicker
+  const [type, setType] = useState('expense');
+  const [category, setCategory] = useState<Category | null>(null);
+  const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const getCategories = async () => {
+    try {
+      const data = await getJson('categories');
+      setCategories(data);
+    } catch {
+      showSnackbar('Issue fetching categories for menu');
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      getCategories();
+    }, [])
+  );
+
   const validateForm = () => {
-    if (!category.trim()) {
+    if (!category) {
       Keyboard.dismiss();
       showSnackbar('Category is required');
       return false;
@@ -30,7 +54,7 @@ const TransactionForm = () => {
       return false;
     }
     return true;
-  }
+  };
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
@@ -40,17 +64,16 @@ const TransactionForm = () => {
 
     try {
       const transaction = {
-        user_id: user.id,
         type, // default to expense
-        category,
+        category_id: category.id,
         amount: parseFloat(amount),
         description,
         transaction_date: new Date(), // default to now, add timestamp picker later.
       };
 
-      await postJson('create_transaction', transaction);
+      await postJson('transactions', transaction);
 
-      setCategory('');
+      setCategory(null);
       setAmount('');
       setDescription('');
       showSnackbar('Transaction saved');
@@ -63,19 +86,25 @@ const TransactionForm = () => {
 
   return (
     <View style={styles.form}>
-      <TextInput
-        label="Category"
-        value={category}
-        onChangeText={setCategory}
-        mode="outlined"
-        style={styles.input}
+      <Dropdown
+        mode="modal"
+        data={categories.map((c) => ({ label: c.name, value: c.id }))}
+        labelField="label"
+        valueField="value"
+        placeholder="Category"
+        value={category?.id ?? null}
+        onChange={(item) => {
+          const found = categories.find((c) => c.id === item.value) ?? null;
+          setCategory(found);
+        }}
+        style={styles.dropdown}
+        placeholderStyle={styles.dropdownPlaceholder}
+        selectedTextStyle={styles.dropdownSelectedText}
       />
-
       <MoneyInput
         value={amount}
         onChangeAmount={setAmount}
       />
-
       <TextInput
         label="Description"
         value={description}
@@ -85,7 +114,6 @@ const TransactionForm = () => {
         numberOfLines={3}
         style={styles.input}
       />
-
       <Button
         mode="contained"
         onPress={handleSubmit}
@@ -107,6 +135,19 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 8,
+  },
+  dropdown: {
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 12,
+  },
+  dropdownPlaceholder: {
+    color: 'gray',
+  },
+  dropdownSelectedText: {
+    fontSize: 16,
   },
 });
 

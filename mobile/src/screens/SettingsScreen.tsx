@@ -1,13 +1,24 @@
-import { Text, ScrollView } from 'react-native';
-import { Appbar } from 'react-native-paper';
+import React, { useCallback } from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
+import { Divider } from 'react-native-paper';
+import { useFocusEffect } from '@react-navigation/native';
+import CategorySettings from '../components/settings/CategorySettings';
 
-export default function HomeScreen() {
+export default function SettingsScreen() {
+  // Future children can hook into this focus effect with a ref or callback being passed down
+  useFocusEffect(
+    useCallback(() => { }, [])
+  );
 
   return (
-    <>
-      <Text>Settings and Such</Text>
-    </>
+    <ScrollView contentContainerStyle={styles.container}>
+      <CategorySettings />
+      <Divider style={styles.divider} />
+    </ScrollView>
   );
 }
 
-// const styles = StyleSheet.create();
+const styles = StyleSheet.create({
+  container: { padding: 16 },
+  divider: { marginVertical: 24 },
+});

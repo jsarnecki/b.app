@@ -13,16 +13,17 @@ use Illuminate\Validation\ValidationException;
 
 class TransactionController extends Controller
 {
+    // TODO: Handle auth verification.
+    protected int $userID = 1;
+
     /**
      * Get all Transactions for a User.
      */
     public function index(Request $request): JsonResponse
     {
-        // TODO: Handle auth verification.
-        $user = User::findOrFail($request->all()['id']);
+        $user = User::findOrFail($this->userID);
         return response()->json($user->transactions);
     }
-
 
     /**
      * Show a Transaction for a User.
@@ -38,13 +39,17 @@ class TransactionController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'user_id' => 'required|integer', // eventually handle this by tying to auth user instead of as a param
             'type' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
+            'category_id' => 'required|integer',
             'amount' => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'transaction_date' => 'required|date', // eventually add specific format [Rule::date()->format(ideal timestamp)]
         ]);
+
+        $data = [
+            ...$data,
+            'user_id' => $this->userID // potentially use ->associate instead.. better practice?
+        ];
 
         try {
             DB::beginTransaction();

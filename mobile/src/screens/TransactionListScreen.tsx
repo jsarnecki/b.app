@@ -4,12 +4,9 @@ import TransactionList from '../components/TransactionList';
 import { useCallback, useState } from 'react';
 import { useSnackbar } from '../providers/SnackbarProvider';
 import { useFocusEffect } from '@react-navigation/native';
-import { useUser } from '../providers/UserProvider';
 import { getJson } from '../api/api';
 
 export default function TransactionListScreen() {
-  const { user } = useUser();
-
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -20,7 +17,7 @@ export default function TransactionListScreen() {
       const fetchTransactions = async () => {
         setLoading(true);
         try {
-          const data = await getJson(`get_transactions?id=${user.id}`);
+          const data = await getJson('transactions');
 
           setTransactions(data);
         } catch (error) {
