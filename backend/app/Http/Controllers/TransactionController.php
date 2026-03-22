@@ -40,8 +40,7 @@ class TransactionController extends Controller
     {
         $data = $request->validate([
             'type' => 'required|string|max:255',
-            /* 'category' => 'required|string|max:255', */
-            'category_id' => 'required|integer', // I think the F/E will have the ID
+            'category_id' => 'required|integer',
             'amount' => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'transaction_date' => 'required|date', // eventually add specific format [Rule::date()->format(ideal timestamp)]
@@ -49,7 +48,7 @@ class TransactionController extends Controller
 
         $data = [
             ...$data,
-            'user_id' => $this->userID
+            'user_id' => $this->userID // potentially use ->associate instead.. better practice?
         ];
 
         try {
