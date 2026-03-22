@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
 {
@@ -26,11 +29,19 @@ class CategoryController extends Controller
             'name' => 'required|string|max:100',
         ]);
 
-        $category = Category::create([
-            'user_id' => $this->userID,
-            /* 'user_id' => $request->user()->id, */
-            'name'    => $validated['name'],
-        ]);
+        try {
+            DB::beginTransaction();
+            $category = Category::create([
+                'user_id' => $this->userID,
+                /* 'user_id' => $request->user()->id, */
+                'name'    => $validated['name'],
+            ]);
+            DB::commit();
+        } catch (Exception $error) {
+            DB::rollBack();
+            Log::error('Failed to create category: ' . $error->getMessage());
+            return response()->json(['message' => 'Failed to save category'], 500);
+        }
 
         return response()->json($category, 201);
     }
