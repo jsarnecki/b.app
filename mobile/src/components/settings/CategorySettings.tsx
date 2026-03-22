@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, FlatList, TouchableOpacity, StyleSheet, Keyboard } from 'react-native';
 import {
   Text,
   Surface,
@@ -79,6 +79,7 @@ export default function CategorySettings() {
     if (!trimmed) return;
 
     setAdding(true);
+    Keyboard.dismiss();
     try {
       await postJson('categories', { name: trimmed });
       setNewCategoryName('');
@@ -139,7 +140,7 @@ export default function CategorySettings() {
     return (
       <TouchableOpacity
         onPress={() => editMode && toggleSelected(item.id)}
-        activeOpacity={editMode ? 0.6 : 1}
+        activeOpacity={editMode ? 0.4 : 1}
         style={styles.itemRow}
       >
         {editMode && (
@@ -179,12 +180,9 @@ export default function CategorySettings() {
           }}
           contentContainerStyle={styles.modal}
         >
-          <Text variant="titleMedium" style={styles.modalTitle}>
-            New Category
-          </Text>
           <TextInput
             mode="outlined"
-            label="Category name"
+            label="New Category"
             value={newCategoryName}
             onChangeText={setNewCategoryName}
             autoFocus
@@ -265,9 +263,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 24,
     backgroundColor: 'white',
-  },
-  modalTitle: {
-    marginBottom: 16,
   },
   modalInput: {
     marginBottom: 16,
