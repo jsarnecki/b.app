@@ -14,7 +14,8 @@ import {
 import { useSnackbar } from '../../providers/SnackbarProvider';
 import { deleteJson, getJson, postJson } from '../../api/api';
 
-type Category = {
+// Move to types file.
+interface Category {
   id: number;
   name: string;
 };
