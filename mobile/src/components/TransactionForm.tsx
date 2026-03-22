@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, StyleSheet, Keyboard } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { TextInput, Button, Menu } from 'react-native-paper';
+import { TextInput, Button } from 'react-native-paper';
 import MoneyInput from './MoneyInput';
 import { useSnackbar } from '../providers/SnackbarProvider';
-import { useUser } from '../providers/UserProvider';
 import { getJson, postJson } from '../api/api';
+import { useFocusEffect } from '@react-navigation/native';
 
 // let's think about creating types directory.
 interface Category {
@@ -16,7 +16,6 @@ interface Category {
 }
 
 const TransactionForm = () => {
-  const { user, isLoading: userLoading } = useUser();
   const { showSnackbar } = useSnackbar();
 
   // const [date, setDate] = useState(new Date()); // State for eventual datepicker
@@ -28,20 +27,19 @@ const TransactionForm = () => {
   const [categories, setCategories] = useState<Category[]>([]);
 
   const getCategories = async () => {
-    setLoading(true);
     try {
       const data = await getJson('categories');
       setCategories(data);
     } catch {
       showSnackbar('Issue fetching categories for menu');
-    } finally {
-      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    getCategories();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getCategories();
+    }, [])
+  );
 
   const validateForm = () => {
     if (!category) {
@@ -66,7 +64,6 @@ const TransactionForm = () => {
 
     try {
       const transaction = {
-        user_id: user.id,
         type, // default to expense
         category_id: category.id,
         amount: parseFloat(amount),
