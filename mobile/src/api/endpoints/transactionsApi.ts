@@ -7,7 +7,7 @@ export const fetchTransactions = createAsyncThunk(
   'transactions/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      return await getJson('api/transactions') as Transaction[];
+      return await getJson('transactions') as Transaction[];
     } catch (err: any) {
       return rejectWithValue(err.message ?? 'Failed to fetch transactions');
     }
@@ -18,7 +18,7 @@ export const addTransaction = createAsyncThunk(
   'transactions/addOne',
   async (payload: CreateTransactionPayload, { rejectWithValue, dispatch }) => {
     try {
-      const transaction = await postJson('api/transactions', payload) as Transaction;
+      const transaction = await postJson('transactions', payload) as Transaction;
       dispatch(invalidateTags(['Transactions']));
       return transaction;
     } catch (err: any) {
@@ -32,7 +32,7 @@ export const deleteTransaction = createAsyncThunk(
   async (id: number, { rejectWithValue, dispatch }) => {
     dispatch({ type: 'transactions/removeOne', payload: id });
     try {
-      await deleteJson(`api/transactions/${id}`);
+      await deleteJson(`transactions/${id}`);
       dispatch(invalidateTags(['Transactions']));
     } catch (err: any) {
       dispatch(fetchTransactions());

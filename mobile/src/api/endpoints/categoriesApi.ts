@@ -8,7 +8,7 @@ export const fetchCategories = createAsyncThunk(
   'categories/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      return await getJson('api/categories') as Category[];
+      return await getJson('categories') as Category[];
     } catch (err: any) {
       return rejectWithValue(err.message ?? 'Failed to fetch categories');
     }
@@ -19,7 +19,7 @@ export const addCategory = createAsyncThunk(
   'categories/add',
   async (name: string, { rejectWithValue, dispatch }) => {
     try {
-      const category = await postJson('api/categories', { name }) as Category;
+      const category = await postJson('categories', { name }) as Category;
       dispatch(invalidateTags(['Categories']));
       return category;
     } catch (err: any) {
@@ -33,7 +33,7 @@ export const deleteCategory = createAsyncThunk(
   async (id: number, { rejectWithValue, dispatch }) => {
     dispatch({ type: 'categories/removeOne', payload: id }); // optimistic
     try {
-      await deleteJson(`api/categories/${id}`);
+      await deleteJson(`categories/${id}`);
       dispatch(invalidateTags(['Categories']));
     } catch (err: any) {
       dispatch(fetchCategories()); // rollback
