@@ -34,6 +34,10 @@ const transactionsSlice = createSlice({
       .addCase(addTransaction.fulfilled, (state, action) => {
         transactionsAdapter.addOne(state, action.payload);
       })
+      .addCase(addTransaction.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
       .addCase(addTransaction.rejected, (state, action) => {
         state.error = action.payload as string;
       })
