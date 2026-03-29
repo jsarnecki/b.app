@@ -40,7 +40,7 @@ export const getJson = async (route: string) => {
   return data;
 }
 
-export const postJson = async (route: string, body: Record<string, unknown>) => {
+export const postJson = async (route: string, body: Object) => {
   const response = await fetch(`${API_URL}/${route}`, {
     method: 'POST',
     headers: await getHeaders(),
