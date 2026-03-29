@@ -1,45 +1,42 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Keyboard } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { TextInput, Button } from 'react-native-paper';
 import MoneyInput from './MoneyInput';
 import { useSnackbar } from '../providers/SnackbarProvider';
-import { getJson, postJson } from '../api/api';
-import { useFocusEffect } from '@react-navigation/native';
-
-// let's think about creating types directory.
-interface Category {
-  id: number;
-  name: string;
-  user_id: number;
-  // timestamps
-}
+import { Category } from '../types/category';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { selectAllCategories } from '../store/slices/categoriesSlice';
+import { addTransaction } from '../api/endpoints/transactionsApi';
+import { fetchCategories } from '../api/endpoints/categoriesApi';
 
 const TransactionForm = () => {
   const { showSnackbar } = useSnackbar();
+  const dispatch = useAppDispatch();
 
+  const categories = useAppSelector(selectAllCategories);
+  const transactionStatus = useAppSelector(state => state.transactions.status);
+  const categoryStatus = useAppSelector(state => state.categories.status);
+  const error = useAppSelector(state => state.categories.error);
+
+  // TODO switch to Formik or similar for form state
   // const [date, setDate] = useState(new Date()); // State for eventual datepicker
-  const [type, setType] = useState('expense');
+  const [type, setType] = useState<'expense' | 'refund'>('expense');
   const [category, setCategory] = useState<Category | null>(null);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
 
-  const getCategories = async () => {
-    try {
-      const data = await getJson('categories');
-      setCategories(data);
-    } catch {
-      showSnackbar('Issue fetching categories for menu');
+  useEffect(() => {
+    if (categoryStatus === 'idle') {
+      dispatch(fetchCategories());
     }
-  };
+  }, [categoryStatus]);
 
-  useFocusEffect(
-    useCallback(() => {
-      getCategories();
-    }, [])
-  );
+  useEffect(() => {
+    if (categoryStatus === 'failed' && error) {
+      showSnackbar(error);
+    }
+  }, [categoryStatus, error]);
 
   const validateForm = () => {
     if (!category) {
@@ -59,29 +56,29 @@ const TransactionForm = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    setLoading(true);
     Keyboard.dismiss();
 
     try {
-      const transaction = {
+      const result = await dispatch(addTransaction({
         type, // default to expense
         category_id: category.id,
-        amount: parseFloat(amount),
+        amount: amount,
         description,
         transaction_date: new Date(), // default to now, add timestamp picker later.
-      };
+      }));
 
-      await postJson('transactions', transaction);
+      if (!addTransaction.fulfilled.match(result)) {
+        showSnackbar(result.payload as string);
+        return;
+      }
 
+      showSnackbar('Transaction saved')
       setCategory(null);
       setAmount('');
       setDescription('');
-      showSnackbar('Transaction saved');
     } catch (error) {
       showSnackbar(error instanceof Error ? error.message : 'Network error, please try again.');
     }
-
-    setLoading(false);
   };
 
   return (
@@ -118,7 +115,7 @@ const TransactionForm = () => {
         mode="contained"
         onPress={handleSubmit}
         style={styles.button}
-        loading={loading}
+        loading={transactionStatus === 'loading'}
       >
         Add Transaction
       </Button>

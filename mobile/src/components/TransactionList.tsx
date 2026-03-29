@@ -1,19 +1,16 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { List, Text } from 'react-native-paper';
-
-interface Transaction {
-  id: number;
-  category: string;
-  amount: string;
-  transaction_date: string;
-}
+import { Transaction } from '../types/transaction';
 
 interface TransactionListProps {
   transactions: Transaction[];
+  onDelete: (id: number) => void;
+  isLoading: boolean;
 }
 
-const TransactionList = ({ transactions }: TransactionListProps) => {
+const TransactionList = ({ transactions, onDelete, isLoading }: TransactionListProps) => {
+  // TODO add overlay when loading for better UX
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -39,7 +36,7 @@ const TransactionList = ({ transactions }: TransactionListProps) => {
       {transactions.map((transaction) => (
         <List.Item
           key={transaction.id}
-          title={transaction.category}
+          title={transaction.description}
           description={formatDate(transaction.transaction_date)}
           right={() => (
             <Text style={styles.amount}>
