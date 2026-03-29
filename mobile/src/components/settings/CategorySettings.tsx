@@ -12,36 +12,36 @@ import {
   ActivityIndicator,
 } from 'react-native-paper';
 import { useSnackbar } from '../../providers/SnackbarProvider';
-import { deleteJson, getJson, postJson } from '../../api/api';
-
-// Move to types file.
-interface Category {
-  id: number;
-  name: string;
-};
+import { Category } from '../../types/category';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { selectAllCategories } from '../../store/slices/categoriesSlice';
+import { addCategory, deleteCategory, fetchCategories } from '../../api/endpoints/categoriesApi';
 
 export default function CategorySettings() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const dispatch = useAppDispatch();
+
+  const categoryFetch = useAppSelector(state => state.categories.fetchStatus);
+  const categoryAdding = useAppSelector(state => state.categories.mutating);
+  const error = useAppSelector(state => state.categories.error);
+  const categories = useAppSelector(selectAllCategories);
+
   const [editMode, setEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [modalVisible, setModalVisible] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
-  const [adding, setAdding] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const { showSnackbar } = useSnackbar();
 
-  const fetchCategories = useCallback(async () => {
-    try {
-      const data = await getJson('categories');
-      setCategories(data);
-    } catch {
-      showSnackbar('Failed to load categories');
+  useEffect(() => {
+    if (categoryFetch === 'idle') {
+      dispatch(fetchCategories());
     }
-  }, []);
+  }, [categoryFetch]);
 
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    if (categoryFetch === 'failed' && error) {
+      showSnackbar(error);
+    }
+  }, [categoryFetch, error]);
 
   const exitEditMode = () => {
     setEditMode(false);
@@ -56,41 +56,33 @@ export default function CategorySettings() {
     });
   };
 
-  const handleBulkDelete = async () => {
-    setDeleting(true);
-    try {
-      await Promise.all([...selectedIds].map((id) => deleteJson(`categories/${id}`)));
-      await fetchCategories();
-      exitEditMode();
-      showSnackbar(
-        selectedIds.size === 1
-          ? 'Category deleted'
-          : `${selectedIds.size} categories deleted`
-      );
-    } catch {
-      showSnackbar('Failed to delete categories');
-    } finally {
-      setDeleting(false);
-    }
+  const handleBulkDelete = () => {
+    // TODO how to get error message? Or will it automatically happen in useEffect?
+    Promise.all([...selectedIds].map((id) => dispatch(deleteCategory(id))));
+
+    exitEditMode();
+    showSnackbar(
+      selectedIds.size === 1
+        ? 'Category deleted'
+        : `${selectedIds.size} categories deleted`
+    );
   };
 
   const handleAdd = async () => {
     const trimmed = newCategoryName.trim();
     if (!trimmed) return;
 
-    setAdding(true);
     Keyboard.dismiss();
-    try {
-      await postJson('categories', { name: trimmed });
-      setNewCategoryName('');
-      setModalVisible(false);
-      await fetchCategories();
-      showSnackbar('Category added');
-    } catch {
-      showSnackbar('Failed to create category');
-    } finally {
-      setAdding(false);
+
+    const result = await dispatch(addCategory(trimmed));
+    if (!addCategory.fulfilled.match(result)) {
+      showSnackbar(result.payload as string);
+      return;
     }
+
+    showSnackbar('Category added');
+    setNewCategoryName('');
+    setModalVisible(false);
   };
 
   const renderHeader = () => (
@@ -107,15 +99,11 @@ export default function CategorySettings() {
               onPress={() => setModalVisible(true)}
             />
             {selectedIds.size > 0 && (
-              deleting ? (
-                <ActivityIndicator size={20} style={styles.deleteLoader} />
-              ) : (
-                <IconButton
-                  icon="delete-outline"
-                  size={20}
-                  onPress={handleBulkDelete}
-                />
-              )
+              <IconButton
+                icon="delete-outline"
+                size={20}
+                onPress={handleBulkDelete}
+              />
             )}
             <IconButton
               icon="close"
@@ -200,8 +188,8 @@ export default function CategorySettings() {
             <Button
               mode="contained"
               onPress={handleAdd}
-              loading={adding}
-              disabled={adding || !newCategoryName.trim()}
+              loading={categoryAdding}
+              disabled={categoryAdding || !newCategoryName.trim()}
             >
               Save
             </Button>

@@ -15,9 +15,9 @@ const TransactionForm = () => {
   const dispatch = useAppDispatch();
 
   const categories = useAppSelector(selectAllCategories);
-  const transactionStatus = useAppSelector(state => state.transactions.status);
-  const categoryStatus = useAppSelector(state => state.categories.status);
+  const categoryFetch = useAppSelector(state => state.categories.fetchStatus);
   const error = useAppSelector(state => state.categories.error);
+  const transactionAdd = useAppSelector(state => state.transactions.mutating);
 
   // TODO switch to Formik or similar for form state
   // const [date, setDate] = useState(new Date()); // State for eventual datepicker
@@ -27,16 +27,16 @@ const TransactionForm = () => {
   const [description, setDescription] = useState('');
 
   useEffect(() => {
-    if (categoryStatus === 'idle') {
+    if (categoryFetch === 'idle') {
       dispatch(fetchCategories());
     }
-  }, [categoryStatus]);
+  }, [categoryFetch]);
 
   useEffect(() => {
-    if (categoryStatus === 'failed' && error) {
+    if (categoryFetch === 'failed' && error) {
       showSnackbar(error);
     }
-  }, [categoryStatus, error]);
+  }, [categoryFetch, error]);
 
   const validateForm = () => {
     if (!category) {
@@ -115,7 +115,7 @@ const TransactionForm = () => {
         mode="contained"
         onPress={handleSubmit}
         style={styles.button}
-        loading={transactionStatus === 'loading'}
+        loading={transactionAdd}
       >
         Add Transaction
       </Button>
