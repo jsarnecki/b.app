@@ -9,7 +9,8 @@ const categoriesAdapter = createEntityAdapter<Category>();
 const categoriesSlice = createSlice({
   name: 'categories',
   initialState: categoriesAdapter.getInitialState({
-    status: 'idle' as 'idle' | 'loading' | 'succeeded' | 'failed',
+    fetchStatus: 'idle' as 'idle' | 'loading' | 'succeeded' | 'failed',
+    mutating: false,
     error: null as string | null,
   }),
   reducers: {
@@ -20,26 +21,31 @@ const categoriesSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchCategories.pending, (state) => {
-        state.status = 'loading';
+        state.fetchStatus = 'loading';
         state.error = null;
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.fetchStatus = 'succeeded';
         categoriesAdapter.setAll(state, action.payload);
       })
       .addCase(fetchCategories.rejected, (state, action) => {
-        state.status = 'failed';
+        state.fetchStatus = 'failed';
         state.error = action.payload as string;
       })
+      .addCase(addCategory.pending, (state) => {
+        state.mutating = true;
+      })
       .addCase(addCategory.fulfilled, (state, action) => {
+        state.mutating = false;
         categoriesAdapter.addOne(state, action.payload);
       })
       .addCase(addCategory.rejected, (state, action) => {
+        state.mutating = false;
         state.error = action.payload as string;
       })
       .addCase(invalidateTags, (state, action) => {
         if (action.payload.includes('Categories')) {
-          state.status = 'idle';
+          state.fetchStatus = 'idle';
         }
       });
   },

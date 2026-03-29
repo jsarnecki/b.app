@@ -12,9 +12,9 @@ export default function TransactionListScreen() {
   const dispatch = useAppDispatch();
 
   const transactions = useAppSelector(selectAllTransactions);
-  const status = useAppSelector(state => state.transactions.status);
+  const status = useAppSelector(state => state.transactions.fetchStatus);
   const error = useAppSelector(state => state.transactions.error);
-
+  console.log('fertcgStatus: ' + status)
   useEffect(() => {
     if (status === 'idle') {
       dispatch(fetchTransactions());

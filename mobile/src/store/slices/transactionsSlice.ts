@@ -9,7 +9,8 @@ const transactionsAdapter = createEntityAdapter<Transaction>();
 const transactionsSlice = createSlice({
   name: 'transactions',
   initialState: transactionsAdapter.getInitialState({
-    status: 'idle' as 'idle' | 'loading' | 'succeeded' | 'failed',
+    fetchStatus: 'idle' as 'idle' | 'loading' | 'succeeded' | 'failed',
+    mutating: false,
     error: null as string | null,
   }),
   reducers: {
@@ -20,30 +21,32 @@ const transactionsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchTransactions.pending, (state) => {
-        state.status = 'loading';
+        state.fetchStatus = 'loading';
         state.error = null;
       })
       .addCase(fetchTransactions.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.fetchStatus = 'succeeded';
         transactionsAdapter.setAll(state, action.payload);
       })
       .addCase(fetchTransactions.rejected, (state, action) => {
-        state.status = 'failed';
+        state.fetchStatus = 'failed';
         state.error = action.payload as string;
+      })
+      .addCase(addTransaction.pending, (state) => {
+        state.mutating = true;
+        state.error = null;
       })
       .addCase(addTransaction.fulfilled, (state, action) => {
         transactionsAdapter.addOne(state, action.payload);
-      })
-      .addCase(addTransaction.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
+        state.mutating = false;
       })
       .addCase(addTransaction.rejected, (state, action) => {
         state.error = action.payload as string;
+        state.mutating = false;
       })
       .addCase(invalidateTags, (state, action) => {
         if (action.payload.includes('Transactions')) {
-          state.status = 'idle';
+          state.fetchStatus = 'idle';
         }
       });
   },
