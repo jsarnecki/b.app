@@ -14,6 +14,6 @@ export interface CreateTransactionPayload {
   type: 'expense' | 'refund';
   amount: string;
   description: string;
-  transaction_date: string;
+  transaction_date: Date;
   category_id: number | null;
 }
