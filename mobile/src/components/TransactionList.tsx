@@ -1,13 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { List, Text } from 'react-native-paper';
-import { Transaction } from '../types/transaction';
-
-interface TransactionListProps {
-  transactions: Transaction[];
-  onDelete: (id: number) => void;
-  isLoading: boolean;
-}
+import { Transaction, TransactionListProps } from '../types/transaction';
 
 const TransactionList = ({ transactions, onDelete, isLoading }: TransactionListProps) => {
   // TODO add overlay when loading for better UX

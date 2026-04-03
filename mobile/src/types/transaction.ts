@@ -17,3 +17,9 @@ export interface CreateTransactionPayload {
   transaction_date: Date;
   category_id: number | null;
 }
+
+export interface TransactionListProps {
+  transactions: Transaction[];
+  onDelete: (id: number) => void;
+  isLoading: boolean;
+}
