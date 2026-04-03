@@ -20,10 +20,10 @@ import { addCategory, deleteCategory, fetchCategories } from '../../api/endpoint
 export default function CategorySettings() {
   const dispatch = useAppDispatch();
 
+  const categories = useAppSelector(selectAllCategories);
   const categoryFetch = useAppSelector(state => state.categories.fetchStatus);
   const categoryAdding = useAppSelector(state => state.categories.mutating);
   const error = useAppSelector(state => state.categories.error);
-  const categories = useAppSelector(selectAllCategories);
 
   const [editMode, setEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -56,16 +56,19 @@ export default function CategorySettings() {
     });
   };
 
-  const handleBulkDelete = () => {
-    // TODO how to get error message? Or will it automatically happen in useEffect?
-    Promise.all([...selectedIds].map((id) => dispatch(deleteCategory(id))));
+  const handleBulkDelete = async () => {
+    const result = await Promise.allSettled([...selectedIds].map((id) => dispatch(deleteCategory(id))));
+    const errors = result.filter((res) => res.status === 'fulfilled' && deleteCategory.rejected.match(res.value));
+
+    if (errors.length === 0) {
+      showSnackbar(selectedIds.size === 1 ? 'Category deleted' : `${selectedIds.size} categories deleted`);
+    } else if (errors.length === result.length) {
+      showSnackbar('Failed to delete categories');
+    } else {
+      showSnackbar(`${result.length - errors.length} deleted, ${errors.length} failed`);
+    }
 
     exitEditMode();
-    showSnackbar(
-      selectedIds.size === 1
-        ? 'Category deleted'
-        : `${selectedIds.size} categories deleted`
-    );
   };
 
   const handleAdd = async () => {
