@@ -12,20 +12,19 @@ export default function TransactionListScreen() {
   const dispatch = useAppDispatch();
 
   const transactions = useAppSelector(selectAllTransactions);
-  const status = useAppSelector(state => state.transactions.fetchStatus);
+  const transFetch = useAppSelector(state => state.transactions.fetchStatus);
   const error = useAppSelector(state => state.transactions.error);
-  console.log('fertcgStatus: ' + status)
   useEffect(() => {
-    if (status === 'idle') {
+    if (transFetch === 'idle') {
       dispatch(fetchTransactions());
     }
-  }, [status]);
+  }, [transFetch]);
 
   useEffect(() => {
-    if (status === 'failed' && error) {
+    if (transFetch === 'failed' && error) {
       showSnackbar(error);
     }
-  }, [status, error]);
+  }, [transFetch, error]);
 
   const handleDelete = (id: number) => {
     dispatch(deleteTransaction(id));
@@ -39,7 +38,7 @@ export default function TransactionListScreen() {
           <TransactionList
             transactions={transactions}
             onDelete={handleDelete}
-            isLoading={status === 'loading'}
+            isLoading={transFetch === 'loading'}
           />
         </Surface>
       </ScrollView>

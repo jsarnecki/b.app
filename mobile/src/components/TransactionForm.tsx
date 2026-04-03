@@ -17,7 +17,7 @@ const TransactionForm = () => {
   const categories = useAppSelector(selectAllCategories);
   const categoryFetch = useAppSelector(state => state.categories.fetchStatus);
   const error = useAppSelector(state => state.categories.error);
-  const transactionAdd = useAppSelector(state => state.transactions.mutating);
+  const transactionMutating = useAppSelector(state => state.transactions.mutating);
 
   // TODO switch to Formik or similar for form state
   // const [date, setDate] = useState(new Date()); // State for eventual datepicker
@@ -115,7 +115,7 @@ const TransactionForm = () => {
         mode="contained"
         onPress={handleSubmit}
         style={styles.button}
-        loading={transactionAdd}
+        loading={transactionMutating}
       >
         Add Transaction
       </Button>
