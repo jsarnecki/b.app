@@ -1,12 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
+import { Response } from "../types/api";
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl;
-
-interface Response {
-  message?: string;
-  error?: Record<string, string> | string;
-}
 
 const getHeaders = async () => {
   const token = await AsyncStorage.getItem('auth_token')
@@ -40,7 +36,7 @@ export const getJson = async (route: string) => {
   return data;
 }
 
-export const postJson = async (route: string, body: Record<string, unknown>) => {
+export const postJson = async (route: string, body: Object) => {
   const response = await fetch(`${API_URL}/${route}`, {
     method: 'POST',
     headers: await getHeaders(),

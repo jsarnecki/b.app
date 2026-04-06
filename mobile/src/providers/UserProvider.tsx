@@ -2,17 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useSnackbar } from './SnackbarProvider';
 import { getJson } from '../api/api';
-
-interface User {
-  id: number;
-  email: string;
-}
-
-interface UserContextType {
-  user: User | null;
-  isLoading: boolean;
-  // Later: setUser, logout, token
-}
+import { User, UserContextType } from '../types/user';
 
 const DEV_DEFAULT_USER: User = { id: 1, email: 'testing' };
 const UserContext = createContext<UserContextType | null>(null);

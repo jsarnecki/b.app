@@ -22,6 +22,7 @@ class TransactionController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = User::findOrFail($this->userID);
+        // TODO create resource that brings in the category name for the return
         return response()->json($user->transactions);
     }
 

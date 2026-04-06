@@ -1,39 +1,46 @@
 import { ScrollView, StyleSheet } from 'react-native';
 import { Surface } from 'react-native-paper';
 import TransactionList from '../components/TransactionList';
-import { useCallback, useState } from 'react';
+import { useEffect } from 'react';
 import { useSnackbar } from '../providers/SnackbarProvider';
-import { useFocusEffect } from '@react-navigation/native';
-import { getJson } from '../api/api';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { selectAllTransactions } from '../store/slices/transactionsSlice';
+import { deleteTransaction, fetchTransactions } from '../api/endpoints/transactionsApi';
 
 export default function TransactionListScreen() {
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(false);
-
   const { showSnackbar } = useSnackbar();
+  const dispatch = useAppDispatch();
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchTransactions = async () => {
-        setLoading(true);
-        try {
-          const data = await getJson('transactions');
+  const transactions = useAppSelector(selectAllTransactions);
+  const transactionFetching = useAppSelector(state => state.transactions.fetchStatus);
+  const error = useAppSelector(state => state.transactions.error);
 
-          setTransactions(data);
-        } catch (error) {
-          showSnackbar(error instanceof Error ? error.message : 'Network error, please try again.');
-        }
-        setLoading(false);
-      }
-      fetchTransactions();
-    }, [])
-  );
+  useEffect(() => {
+    if (transactionFetching === 'idle') {
+      dispatch(fetchTransactions());
+    }
+  }, [transactionFetching]);
+
+  useEffect(() => {
+    if (transactionFetching === 'failed' && error) {
+      showSnackbar(error);
+    }
+  }, [transactionFetching, error]);
+
+  const handleDelete = (id: number) => {
+    dispatch(deleteTransaction(id));
+    // TODO add snackbar for delete success when delete route built
+  }
 
   return (
     <>
       <ScrollView keyboardShouldPersistTaps="handled" style={styles.container}>
         <Surface style={styles.surface} elevation={1}>
-          <TransactionList transactions={transactions} />
+          <TransactionList
+            transactions={transactions}
+            onDelete={handleDelete}
+            isLoading={transactionFetching === 'loading'}
+          />
         </Surface>
       </ScrollView>
     </>
