@@ -18,10 +18,11 @@ import { selectAllCategories } from '../../store/slices/categoriesSlice';
 import { addCategory, deleteCategory, fetchCategories } from '../../api/endpoints/categoriesApi';
 
 export default function CategorySettings() {
+  const { showSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
 
   const categories = useAppSelector(selectAllCategories);
-  const categoryFetch = useAppSelector(state => state.categories.fetchStatus);
+  const categoryFetching = useAppSelector(state => state.categories.fetchStatus);
   const categoryAdding = useAppSelector(state => state.categories.mutating);
   const error = useAppSelector(state => state.categories.error);
 
@@ -29,19 +30,18 @@ export default function CategorySettings() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [modalVisible, setModalVisible] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
-  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
-    if (categoryFetch === 'idle') {
+    if (categoryFetching === 'idle') {
       dispatch(fetchCategories());
     }
-  }, [categoryFetch]);
+  }, [categoryFetching]);
 
   useEffect(() => {
-    if (categoryFetch === 'failed' && error) {
+    if (categoryFetching === 'failed' && error) {
       showSnackbar(error);
     }
-  }, [categoryFetch, error]);
+  }, [categoryFetching, error]);
 
   const exitEditMode = () => {
     setEditMode(false);
