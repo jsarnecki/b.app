@@ -20,8 +20,8 @@ class BudgetPlan extends Model
     ];
 
     protected $casts = [
-        'starts_at'    => 'date',
-        'ends_at'      => 'date',
+        'starts_at'    => 'date:Y-m-d',
+        'ends_at'      => 'date:Y-m-d',
         'total_amount' => 'decimal:2',
         'surplus_pool' => 'decimal:2',
         'deficit_pool' => 'decimal:2',
