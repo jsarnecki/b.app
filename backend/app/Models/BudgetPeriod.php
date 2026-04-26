@@ -23,7 +23,7 @@ class BudgetPeriod extends Model
         'end_date'      => 'date:Y-m-d',
     ];
 
-    public function plan(): BelongsTo
+    public function budgetPlan(): BelongsTo
     {
         return $this->belongsTo(BudgetPlan::class, 'budget_plan_id');
     }

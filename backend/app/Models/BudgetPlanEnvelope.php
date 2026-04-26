@@ -20,7 +20,7 @@ class BudgetPlanEnvelope extends Model
         'amount' => 'decimal:2',
     ];
 
-    public function plan(): BelongsTo
+    public function budgetPlan(): BelongsTo
     {
         return $this->belongsTo(BudgetPlan::class, 'budget_plan_id');
     }

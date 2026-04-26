@@ -39,14 +39,15 @@ class BudgetPlansTest extends TestCase
         /*     'ends_at'      => null, */
         /* ]); */
 
-        $plan = BudgetPlan::factory()
-            ->for(BudgetPlanEnvelope::factory()
-                ->count(3)
-                ->create())
-            ->create([
-                'starts_at'    => Carbon::now()->format('Y-m-d'),
-                'ends_at'      => null,
-            ]);
+        $plan = BudgetPlan::factory()->create([
+            'starts_at' => Carbon::now()->format('Y-m-d'),
+            'ends_at'   => null,
+        ]);
+
+        BudgetPlanEnvelope::factory()
+            ->count(3)
+            ->for($plan)
+            ->create();
 
         // create PlanEnvelopes for BudgetPlan->associate()
         /* $envelopes = BudgetPlanEnvelope::factory() */
