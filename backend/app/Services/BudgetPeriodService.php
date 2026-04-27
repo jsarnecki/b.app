@@ -35,7 +35,8 @@ class BudgetPeriodService
 
         if (!is_null($plan->ends_at) && $startDate->gt(Carbon::parse($plan->ends_at))) {
             throw new RuntimeException(
-                "Period start date {$startDate->toDateString()} can't be after plan ends_at {$plan->ends_at->toDateString()}."
+                /* trans('error.plan_start_exceeds_end') */ // TODO add to errors file.
+                "Period start date can't be after plan ends_at."
             );
         }
 
