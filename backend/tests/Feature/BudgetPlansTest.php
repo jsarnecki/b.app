@@ -62,13 +62,8 @@ class BudgetPlansTest extends TestCase
      */
     public function testGeneratePeriodWithPreviousEndDate(): void
     {
-        // We need a previously existing budget plan...
-        //
-        //
-        //
-        //
         $plan = BudgetPlan::factory()->create([
-            'starts_at' => Carbon::now()->format('Y-m-d'),
+            'starts_at' => Carbon::now()->subMonths(2)->format('Y-m-d'),
             'ends_at'   => null,
         ]);
 
@@ -77,23 +72,27 @@ class BudgetPlansTest extends TestCase
             ->for($plan)
             ->create();
 
-        // CREATE factory period with plan id from last month. boom
+        $periodOne = $this->budgetPeriodService->generatePeriod($plan, null);
 
-        $period = $this->budgetPeriodService->generatePeriod($plan, null);
+        // Generate next period with previous period's end_date.
+        $periodTwo = $this->budgetPeriodService->generatePeriod($plan, $periodOne->end_date);
 
         // New period is tied to the BudgetPlan.
-        $this->assertSame($plan->id, $period->budget_plan_id);
+        $this->assertSame($plan->id, $periodTwo->budget_plan_id);
 
-        // Period start date is same as BudgetPlan's (when null passed).
-        $this->assertTrue(Carbon::parse($plan->starts_at)->isSameDay(Carbon::parse($period->start_date)));
+        // periodTwo start date is the day after periodTwo's end_date.
+        $this->assertTrue(Carbon::parse($periodOne->end_date)->isBefore(Carbon::parse($periodTwo->start_date)));
 
-        // Period's end date is end of the same month as it starts.
-        $this->assertTrue(Carbon::parse($period->start_date)->endOfMonth()->isSameDay(Carbon::parse($period->end_date)));
+        // periodTwo's end date is end of the same month as it starts.
+        $this->assertTrue(Carbon::parse($periodTwo->start_date)->endOfMonth()->isSameDay(Carbon::parse($periodTwo->end_date)));
 
-        // Period had all 3 envelopes associated to it.
-        $this->assertDatabaseCount('envelopes', 3);
+        // periodOne and periodTwo have all 3 envelopes associated to them.
+        $this->assertDatabaseCount('envelopes', 6);
         $this->assertDatabaseHas('envelopes', [
-            'budget_period_id' => $period->id
+            'budget_period_id' => $periodOne->id
+        ]);
+        $this->assertDatabaseHas('envelopes', [
+            'budget_period_id' => $periodTwo->id
         ]);
     }
 
