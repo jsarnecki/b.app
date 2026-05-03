@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\BudgetPeriod;
 use App\Models\BudgetPlan;
 use App\Models\BudgetPlanEnvelope;
 use App\Services\BudgetPeriodService;
 use Carbon\Carbon;
+use Database\Factories\EnvelopeFactory;
 use RuntimeException;
-use TClass;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -21,6 +21,7 @@ class BudgetPlansTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+        Carbon::setTestNow();
         $this->budgetPeriodService = app(BudgetPeriodService::class);
     }
 
@@ -126,9 +127,51 @@ class BudgetPlansTest extends TestCase
      */
     public function testBudgetPlanStores(): void
     {
-        $response = $this->get('/');
+        $envelopeCount = 3;
+        $envelopes = BudgetPlanEnvelope::factory()
+            ->count($envelopeCount)
+            ->create()
+            ->toArray();
 
-        $response->assertStatus(200);
+        $planStart = Carbon::now()->format('Y-m-d');
+        $planName = $this->faker->words(2, true);
+        $planType = 'monthly';
+        $planTotal = 500;
+
+        $budgetPlanBody = [
+            'name' => $planName,
+            'period_type' => $planType,
+            'total_amount' => $planTotal,
+            'starts_at' => $planStart,
+            'ends_at' => null,
+            'envelopes' => $envelopes,
+        ];
+
+        $response = $this->post('/api/budget_plans', $budgetPlanBody);
+        $response->assertStatus(201);
+
+        $budgetPlan = BudgetPlan::findOrFail($response->json()['plan']['id']);
+        $budgetPeriod = BudgetPeriod::findOrFail($response->json()['period']['id']);
+
+        // budgetPlan has planEnvelopes, and budgetPeriod has periodEnvelopes.
+        $this->assertEquals($envelopeCount, $budgetPlan->planEnvelopes()->count());
+        $this->assertEquals($envelopeCount, $budgetPeriod->envelopes()->count());
+
+        $this->assertDatabaseHas('budget_periods', [
+            'budget_plan_id' => $budgetPlan->id,
+            'start_date' => Carbon::parse($planStart)->startOfDay(),
+            'end_date' => Carbon::parse($planStart)->endOfMonth(),
+            'status' => 'active' // enum? const?
+        ]);
+
+        $this->assertDatabaseHas('budget_plans', [
+            'id' => $budgetPlan->id,
+            'name' => $planName,
+            'period_type' => $planType,
+            'total_amount' => $planTotal,
+            'starts_at' => $planStart,
+            'ends_at' => null,
+        ]);
     }
 
     /**
