@@ -8,7 +8,6 @@ use App\Models\BudgetPlanEnvelope;
 use App\Models\User;
 use App\Services\BudgetPeriodService;
 use Carbon\Carbon;
-use Database\Factories\EnvelopeFactory;
 use RuntimeException;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -207,7 +206,6 @@ class BudgetPlansTest extends TestCase
         /*     $response->assertOk(); */
     }
 
-
     /**
      * Test fetching active period of other user fails.
      */
@@ -230,9 +228,13 @@ class BudgetPlansTest extends TestCase
         $this->assertEquals('Not found.', $response->json()['message']);
     }
 
-
     /**
-     * Test closing budget period (currently 501)
+     * Test closing budget period (currently 501) TODO: update when route implemented
      */
-    public function testClosePeriod(): void {}
+    public function testClosePeriod(): void
+    {
+        $period = BudgetPeriod::factory()->create();
+        $response = $this->post("/api/budget_periods/{$period->id}/close");
+        $response->assertStatus(501);
+    }
 }
