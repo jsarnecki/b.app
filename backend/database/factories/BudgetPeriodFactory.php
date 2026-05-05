@@ -18,12 +18,13 @@ class BudgetPeriodFactory extends Factory
      */
     public function definition(): array
     {
-
+        // TODO: figure out a better base case for this factory
+        $lastMonth = Carbon::now()->subMonth();
         return [
             'budget_plan_id' => BudgetPlan::factory(),
-            'start_date',
-            'end_date',
-            'status',
+            'start_date' => $lastMonth->startOfMonth()->format('Y-m-d'),
+            'end_date' => $lastMonth->endOfMonth()->format('Y-m-d'),
+            'status' => 'closed',
         ];
     }
 
