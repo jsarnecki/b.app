@@ -189,8 +189,22 @@ class BudgetPlansTest extends TestCase
      */
     public function testFetchActivePeriod(): void
     {
-        // get active period
-        $response = $this->get('/api/budget_plans/{plan}/active_period');
+        //TODO: implement when auth in place
+        //
+        /*     $user = User::factory()->create(); */
+        /*     $plan = BudgetPlan::factory()->create([ */
+        /*         'starts_at' => Carbon::now()->startOfMonth()->format('Y-m-d'), */
+        /*         'ends_at'   => null, */
+        /*         'user_id' => $user->id  */
+        /*     ]); */
+        /**/
+        /*     BudgetPeriod::factory() */
+        /*         ->first() */
+        /*         ->for($plan) */
+        /*         ->create(); */
+        /**/
+        /*     $response = $this->get("/api/budget_plans/{$plan->id}/active_period"); */
+        /*     $response->assertOk(); */
     }
 
 
