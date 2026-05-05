@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\BudgetPeriod;
 use App\Models\BudgetPlan;
 use App\Models\BudgetPlanEnvelope;
+use App\Models\User;
 use App\Services\BudgetPeriodService;
 use Carbon\Carbon;
 use Database\Factories\EnvelopeFactory;
@@ -177,18 +178,43 @@ class BudgetPlansTest extends TestCase
     /**
      * Test budget plan creation failed.
      */
-    public function testBudgetPlanStoreFails(): void {}
+    public function testBudgetPlanStoreFails(): void
+    {
+        // What are we checking fails?
+        // /
+    }
 
     /**
      * Test fetching the active period.
      */
-    public function testFetchActivePeriod(): void {}
+    public function testFetchActivePeriod(): void
+    {
+        // get active period
+        $response = $this->get('/api/budget_plans/{plan}/active_period');
+    }
 
 
     /**
      * Test fetching active period of other user fails.
      */
-    public function testFetchWrongActivePeriod(): void {}
+    public function testFetchWrongActivePeriod(): void
+    {
+        $user = User::factory()->create(['id' => 100]); // TODO: update with separate users when auth in place
+        $plan = BudgetPlan::factory()->create([
+            'starts_at' => Carbon::now()->startOfMonth()->format('Y-m-d'),
+            'ends_at'   => null,
+            'user_id' => $user->id
+        ]);
+
+        BudgetPeriod::factory()
+            ->first()
+            ->for($plan)
+            ->create();
+
+        $response = $this->get("/api/budget_plans/{$plan->id}/active_period");
+        $response->assertStatus(404);
+        $this->assertEquals('Not found.', $response->json()['message']);
+    }
 
 
     /**
