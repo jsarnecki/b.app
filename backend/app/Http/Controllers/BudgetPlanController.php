@@ -33,7 +33,7 @@ class BudgetPlanController extends Controller
             'envelopes'                 => ['required', 'array', 'min:1'],
             'envelopes.*.category_id'   => ['required', 'integer', 'exists:categories,id'],
             'envelopes.*.amount'        => ['required', 'numeric', 'min:0'],
-            //TODO eventually have validation that all envelope amounts add up to $total_amount exactly
+            //TODO eventually have validation that all envelope amounts add up to 'total_amount'
         ]);
 
         try {
