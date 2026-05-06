@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,7 +19,7 @@ class TransactionFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => 1,
+            'user_id' => User::factory(),
             'type' => 'expense',
             'category'  => Arr::random(['groceries', 'entertainment', 'dine out']),
             'amount' => $this->faker->randomFloat(2, 1, 250),
