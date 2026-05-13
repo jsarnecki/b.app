@@ -17,7 +17,7 @@ class BudgetPlanController extends Controller
 
     public function index(): JsonResponse
     {
-        $plans = BudgetPlan::where('user_id', $this->userID)->get();
+        $plans = BudgetPlan::with('planEnvelopes.category')->where('user_id', $this->userID)->get();
 
         return response()->json($plans);
     }
