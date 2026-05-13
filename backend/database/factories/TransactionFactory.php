@@ -2,7 +2,8 @@
 
 namespace Database\Factories;
 
-use Illuminate\Foundation\Auth\User;
+use App\Models\Category;
+use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,7 +22,7 @@ class TransactionFactory extends Factory
         return [
             'user_id' => User::factory(),
             'type' => 'expense',
-            'category'  => Arr::random(['groceries', 'entertainment', 'dine out']),
+            'category_id'  => Category::factory(),
             'amount' => $this->faker->randomFloat(2, 1, 250),
             'description' => $this->faker->realTextBetween(2, 10),
             'transaction_date' => $this->faker->dateTimeBetween('-30 days', '-1 day'),
