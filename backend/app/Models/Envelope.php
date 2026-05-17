@@ -18,8 +18,8 @@ class Envelope extends Model
     ];
 
     protected $casts = [
-        'allocated_amount' => 'decimal:2',
-        'carried_over'     => 'decimal:2',
+        'allocated_amount' => 'float',
+        'carried_over'     => 'float',
     ];
 
     public function period(): BelongsTo
