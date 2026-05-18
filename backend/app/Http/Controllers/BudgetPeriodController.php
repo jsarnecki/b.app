@@ -13,7 +13,7 @@ class BudgetPeriodController extends Controller
     public function __construct(private BudgetPeriodService $periodService) {}
 
     // TODO: Handle auth verification.
-    protected int $userID = 1;
+    protected int $userID = 2;
 
     public function activePeriod(BudgetPlan $plan): JsonResponse
     {
@@ -29,7 +29,7 @@ class BudgetPeriodController extends Controller
 
         $envelopes = $period->envelopes()->with('category')->get()->map(function ($envelope) use ($period) {
             // Sum amount of all transactions with envelope's category_id.
-            $spent = DB::table('transactions')
+            $spent = (float) DB::table('transactions')
                 ->where('category_id', $envelope->category_id)
                 ->whereBetween('transaction_date', [
                     $period->start_date->toDateString(),
@@ -39,12 +39,13 @@ class BudgetPeriodController extends Controller
 
             return [
                 'id'               => $envelope->id,
+                'budget_period_id' => $period->id,
                 'category_id'      => $envelope->category_id,
                 'category_name'    => $envelope->category?->name,
                 'allocated_amount' => $envelope->allocated_amount,
                 'carried_over'     => $envelope->carried_over,
-                'spent'            => round((float) $spent, 2),
-                'remaining'        => round((float) $envelope->allocated_amount - (float) $spent, 2),
+                'spent'            => round($spent, 2),
+                'remaining'        => round($envelope->allocated_amount -  $spent, 2),
             ];
         });
 
